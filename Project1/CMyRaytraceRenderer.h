@@ -1,6 +1,7 @@
 #pragma once
 #include "graphics/GrRenderer.h"
 #include "graphics/RayIntersection.h"
+#include "graphics/GrTexture.h"
 
 class CMyRaytraceRenderer :
 	public CGrRenderer
