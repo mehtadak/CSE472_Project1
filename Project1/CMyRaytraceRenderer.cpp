@@ -140,9 +140,46 @@ bool CMyRaytraceRenderer::RendererEnd()
 
 				if (material != NULL)
 				{
-					m_rayimage[r][c * 3] = BYTE(material->Diffuse(0) * 255);
-					m_rayimage[r][c * 3 + 1] = BYTE(material->Diffuse(1) * 255);
-					m_rayimage[r][c * 3 + 2] = BYTE(material->Diffuse(2) * 255);
+					float ambient[3] = { 0, 0, 0 };
+					float diffuse[3] = { 0, 0, 0 };
+					float specular[3] = { 0, 0, 0 };
+
+					for (int i = 0; i < LightCnt(); i++)
+					{
+						const Light& light = GetLight(i);
+						CGrPoint L = Normalize3(light.m_pos - intersect);
+						CGrPoint V = Normalize3(Eye() - intersect);
+						CGrPoint R = Normalize3(N * 2 * Dot3(N, L) - L);
+
+						float NdotL = max(0.0f, Dot3(N, L));
+						float RdotV = max(0.0f, Dot3(R, V));
+
+						for (int j = 0; j < 3; j++)
+						{
+							ambient[j] += material->Ambient(j) * light.m_ambient[j];
+							diffuse[j] += material->Diffuse(j) * light.m_diffuse[j] * NdotL;
+							specular[j] += material->Specular(j) * light.m_specular[j] * pow(RdotV, material->Shininess());
+						}
+					}
+
+					for (int j = 0; j < 3; j++)
+					{
+						colorTotal[j] = min(1.0f, ambient[j] + diffuse[j] + specular[j]);
+					}
+
+					if (texture != NULL)
+					{
+						float texColor[3];
+						texture->Pixel(texcoord.X(), texcoord.Y(), texColor);
+						for (int j = 0; j < 3; j++)
+						{
+							colorTotal[j] *= texColor[j];
+						}
+					}
+
+					m_rayimage[r][c * 3] = BYTE(colorTotal[0] * 255);
+					m_rayimage[r][c * 3 + 1] = BYTE(colorTotal[1] * 255);
+					m_rayimage[r][c * 3 + 2] = BYTE(colorTotal[2] * 255);
 				}
 
 			}
