@@ -50,6 +50,8 @@ public:
     int Height() const {return m_height;}
     BYTE *ImageBits() const {return m_image[0];}
 
+    void Pixel(float u, float v, float color[3]) const;
+
 private:
     bool ReadDIBFile(std::istream &file);
     bool ReadPPMFile(std::istream &file);
