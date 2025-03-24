@@ -80,6 +80,26 @@ void CGrTexture::Render(CGrRenderer *p_renderer)
 {
 }
 
+void CGrTexture::Pixel(float u, float v, float color[3]) const
+{
+    if (Empty())
+    {
+        color[0] = color[1] = color[2] = 0.0f; // Black if empty
+        return;
+    }
+
+    int x = static_cast<int>(u * (m_width - 1));
+    int y = static_cast<int>(v * (m_height - 1));
+
+    x = max(0, min(x, m_width - 1));
+    y = max(0, min(y, m_height - 1));
+
+    BYTE* pixel = m_image[y] + x * 3;
+
+    color[0] = pixel[0] / 255.0f;
+    color[1] = pixel[1] / 255.0f;
+    color[2] = pixel[2] / 255.0f;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Basic Manipulations
