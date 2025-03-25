@@ -44,6 +44,15 @@ CChildView::CChildView()
 	whitepaint->Child(whitebox);
 	whitebox->Box(-10, -10, -10, 5, 5, 5);
 	
+	// Floor
+	CGrPtr<CGrMaterial> greenpaint = new CGrMaterial;
+	greenpaint->AmbientAndDiffuse(0.1f, 0.8f, 0.1f);
+	scene->Child(greenpaint);
+
+	CGrPtr<CGrComposite> floor = new CGrComposite;
+	greenpaint->Child(floor);
+	floor->Box(-15, -18, -15, 30, 1, 30);
+
 	// blue pyramid
 	CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
 	bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
@@ -209,7 +218,7 @@ void CChildView::ConfigureRenderer(CGrRenderer* p_renderer)
 	GLfloat dim[] = { dimd, dimd, dimd, 1.0f };
 	GLfloat brightwhite[] = { 1.f, 1.f, 1.f, 1.0f };
 
-	p_renderer->AddLight(CGrPoint(1, 0.5, 1.2, 0),
+	p_renderer->AddLight(CGrPoint(0, 20, 0),
 		dim, brightwhite, brightwhite);
 }
 
