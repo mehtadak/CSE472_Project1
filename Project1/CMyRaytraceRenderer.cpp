@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "CMyRaytraceRenderer.h"
 
+using namespace std;
+
 void CMyRaytraceRenderer::SetWindow(CWnd* p_window)
 {
     m_window = p_window;
@@ -138,48 +140,55 @@ bool CMyRaytraceRenderer::RendererEnd()
 				m_intersection.IntersectInfo(ray, nearest, t,
 					N, material, texture, texcoord);
 
+				float color[3] = { 0, 0, 0 };
 				if (material != NULL)
 				{
-					float ambient[3] = { 0, 0, 0 };
-					float diffuse[3] = { 0, 0, 0 };
-					float specular[3] = { 0, 0, 0 };
 
 					for (int i = 0; i < LightCnt(); i++)
 					{
+
 						const Light& light = GetLight(i);
-						CGrPoint L = Normalize3(light.m_pos - intersect);
-						CGrPoint V = Normalize3(Eye() - intersect);
-						CGrPoint R = Normalize3(N * 2 * Dot3(N, L) - L);
 
-						float NdotL = max(0.0f, Dot3(N, L));
-						float RdotV = max(0.0f, Dot3(R, V));
-
-						for (int j = 0; j < 3; j++)
-						{
-							ambient[j] += material->Ambient(j) * light.m_ambient[j];
-							diffuse[j] += material->Diffuse(j) * light.m_diffuse[j] * NdotL;
-							specular[j] += material->Specular(j) * light.m_specular[j] * pow(RdotV, material->Shininess());
+						for (int i = 0; i < 3; i++) {
+							color[i] += material->Ambient(i) * light.m_ambient[i];
 						}
-					}
 
-					for (int j = 0; j < 3; j++)
-					{
-						colorTotal[j] = min(1.0f, ambient[j] + diffuse[j] + specular[j]);
+						CGrPoint lightDir = Normalize3(light.m_pos - intersect);
+						CRay shadowRay(intersect + N * 1e-4, lightDir);
+						CGrPoint shadowIntersect;
+						const CRayIntersection::Object* shadowNearest;
+						double shadowT;
+
+						if (!m_intersection.Intersect(shadowRay, 1e20, NULL, shadowNearest, shadowT, shadowIntersect))
+						{
+							double dotNormalLight = Dot3(N, lightDir);
+							if (dotNormalLight > 0)
+							{
+								for (int i = 0; i < 3; i++) {
+									color[i] += material->Diffuse(i) * light.m_diffuse[i] * dotNormalLight;
+								}
+							}
+						}
 					}
 
 					if (texture != NULL)
 					{
 						float texColor[3];
 						texture->Pixel(texcoord.X(), texcoord.Y(), texColor);
-						for (int j = 0; j < 3; j++)
+						for (int i = 0; i < 3; i++)
 						{
-							colorTotal[j] *= texColor[j];
+							color[i] *= texColor[i];
 						}
 					}
 
-					m_rayimage[r][c * 3] = BYTE(colorTotal[0] * 255);
-					m_rayimage[r][c * 3 + 1] = BYTE(colorTotal[1] * 255);
-					m_rayimage[r][c * 3 + 2] = BYTE(colorTotal[2] * 255);
+					// Clamp values to [0,1] before scaling to [0,255]
+					for (int i = 0; i < 3; i++) {
+						color[i] = max(0.0, min(color[i], 1.0));
+					}
+
+					m_rayimage[r][c * 3] = BYTE(color[0] * 255);
+					m_rayimage[r][c * 3 + 1] = BYTE(color[1] * 255);
+					m_rayimage[r][c * 3 + 2] = BYTE(color[2] * 255);
 				}
 
 			}
