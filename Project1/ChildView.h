@@ -1,55 +1,379 @@
 
-// ChildView.h : interface of the CChildView class
+// ChildView.cpp : implementation of the CChildView class
 //
 
+#include "pch.h"
+#include "framework.h"
+#include "Project1.h"
+#include "ChildView.h"
+#include "graphics/OpenGLRenderer.h"
+#include "CMyRaytraceRenderer.h"
 
-#pragma once
-#include "graphics/OpenGLWnd.h"
-#include "graphics/GrCamera.h"
-#include "graphics/GrObject.h"
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
-// CChildView window
 
-class CChildView : public COpenGLWnd
+// CChildView
+
+CChildView::CChildView()
 {
-// Construction
-public:
-	CChildView();
+	m_camera.Set(20., 10., 50., 0., 0., 0., 0., 1., 0.);
 
-// Attributes
-public:
-	CGrCamera m_camera;
+	m_raytrace = false;
+	m_rayimage = NULL;
 
-	CGrPtr<CGrObject> m_scene;
+	CGrPtr<CGrComposite> scene = new CGrComposite;
+	m_scene = scene;
 
-	bool m_raytrace;
+	// A red box
+	CGrPtr<CGrMaterial> redpaint = new CGrMaterial;
+	redpaint->AmbientAndDiffuse(0.8f, 0.0f, 0.0f);
+	scene->Child(redpaint);
 
-private:
-	BYTE** m_rayimage;
-	int         m_rayimagewidth;
-	int         m_rayimageheight;
+	CGrPtr<CGrComposite> redbox = new CGrComposite;
+	redpaint->Child(redbox);
+	redbox->Box(1, 1, 1, 5, 5, 5);
 
-// Operations
-public:
-	void OnGLDraw(CDC* pDC);
-	void ConfigureRenderer(CGrRenderer* p_renderer);
+	// A white box
+	CGrPtr<CGrMaterial> whitepaint = new CGrMaterial;
+	whitepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
+	scene->Child(whitepaint);
+
+	CGrPtr<CGrComposite> whitebox = new CGrComposite;
+	whitepaint->Child(whitebox);
+	whitebox->Box(-10, -10, -10, 5, 5, 5);
+
+	// Floor
+	CGrPtr<CGrMaterial> greenpaint = new CGrMaterial;
+	greenpaint->AmbientAndDiffuse(0.1f, 0.8f, 0.1f);
+	scene->Child(greenpaint);
+
+	CGrPtr<CGrComposite> floor = new CGrComposite;
+	greenpaint->Child(floor);
+	floor->Box(-15, -18, -15, 30, 1, 30);
+
+	// blue pyramid
+	CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
+	bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
+	scene->Child(bluepaint);
+	CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
+	bluepaint->Child(bluepyramid);
+	//verts
+	CGrPoint top(0.0f, 2.5f, 0.0f);
+	CGrPoint base1(-3.0f, -3.0f, 3.0f);
+	CGrPoint base2(3.0f, -3.0f, 3.0f);
+	CGrPoint base3(3.0f, -3.0f, -3.0f);
+	CGrPoint base4(-3.0f, -3.0f, -3.0f);
+	// sides
+	bluepyramid->Poly3(top, base1, base2, NULL);
+	bluepyramid->Poly3(top, base2, base3, NULL);
+	bluepyramid->Poly3(top, base3, base4, NULL);
+	bluepyramid->Poly3(top, base4, base1, NULL);
+	//base
+	bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+
+    // tetrahedron
+	CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
+	tetPaint->AmbientAndDiffuse(1.0f, 0.5f, 0.0f); // orange
+	scene->Child(tetPaint);
+
+	CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
+	tetPaint->Child(tetrahedron);
+
+    // tetrahedron vertices 
+    float edge = 3.0f; 
+    float h = sqrt(2.0f / 3.0f) * edge; 
+
+    CGrPoint v0(-5.0f - edge/2, 0.0f, 0.0f);
+    CGrPoint v1(-5.0f + edge/2, 0.0f, 0.0f);
+    CGrPoint v2(-5.0f, 0.0f, edge * sqrt(3.0f)/2.0f);
+    CGrPoint v3(-5.0f, h, edge * sqrt(3.0f)/6.0f);
+
+    tetrahedron->Poly3(v0, v1, v2, NULL);
+    tetrahedron->Poly3(v0, v2, v3, NULL);
+    tetrahedron->Poly3(v0, v3, v1, NULL);
+    tetrahedron->Poly3(v1, v3, v2, NULL);
+
+    // sphere
+    CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
+    spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
+    scene->Child(spherePaint);
+
+    CGrPtr<CGrComposite> sphere = new CGrComposite;
+    spherePaint->Child(sphere);
+
+    const float radius = 2.0f;
+    const CGrPoint center(0.0f, 5.0f, 0.0f); 
+    const int stacks = 20;
+    const int slices = 20;
+
+    //sphere vertices
+    std::vector<CGrPoint> vertices;
+    for (int i = 0; i <= stacks; ++i) {
+        double phi = GR_PI * (-0.5 + (double)i / stacks); 
+        double y = radius * sin(phi);
+        double r = radius * cos(phi);
+
+        for (int j = 0; j <= slices; ++j) {
+            double theta = 2 * GR_PI * j / slices;
+            double x = r * cos(theta);
+            double z = r * sin(theta);
+            vertices.push_back(center + CGrPoint(x, y, z));
+        }
+    }
+
+    //sphere triangles
+    for (int i = 0; i < stacks; ++i) {
+        for (int j = 0; j < slices; ++j) {
+            int i0 = i * (slices + 1) + j;
+            int i1 = i0 + 1;
+            int i2 = (i + 1) * (slices + 1) + j;
+            int i3 = i2 + 1;
+
+            sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
+            sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
+        }
+    }
+
+    // cylinder
+	CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
+	cylinderPaint->AmbientAndDiffuse(0.2f, 0.8f, 0.2f); // green
+	scene->Child(cylinderPaint);
+
+	CGrPtr<CGrComposite> cylinder = new CGrComposite;
+	cylinderPaint->Child(cylinder);
+
+	const float cylRadius = 1.5f;
+	const float cylHeight = 5.0f;
+	const CGrPoint cylBase(-10.0f, 0.0f, 0.0f);
+	const int segments = 20;
+
+	std::vector<CGrPoint> bottomPoints, topPoints;
+
+	//cylinder vertices
+	for (int i = 0; i < segments; ++i) {
+		double theta = 2 * GR_PI * i / segments;
+		double x = cylRadius * cos(theta);
+		double z = cylRadius * sin(theta);
+		bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
+		topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
+	}
+
+	//cylinder
+	for (int i = 0; i < segments; ++i) {
+		int next = (i + 1) % segments;
+
+		// sides
+		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
+
+		// bottom 
+		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
+
+		// top cap
+		CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
+		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
+	}
+}
+
+CChildView::~CChildView()
+{
+}
+
+
+BEGIN_MESSAGE_MAP(CChildView, COpenGLWnd)
+	ON_WM_PAINT()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
+	ON_COMMAND(ID_RENDER_RAYTRACE, &CChildView::OnRenderRaytrace)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_RAYTRACE, &CChildView::OnUpdateRenderRaytrace)
+END_MESSAGE_MAP()
+
+
+
+// CChildView message handlers
+
+BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
+{
+	if (!COpenGLWnd::PreCreateWindow(cs))
+		return FALSE;
+
+	cs.dwExStyle |= WS_EX_CLIENTEDGE;
+	cs.style &= ~WS_BORDER;
+	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
+		::LoadCursor(nullptr, IDC_ARROW), reinterpret_cast<HBRUSH>(COLOR_WINDOW+1), nullptr);
+
+	return TRUE;
+}
+
+void CChildView::OnGLDraw(CDC* pDC)
+{
+	if (m_raytrace)
+	{
+		// Clear the color buffer
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Set up for parallel projection
+		int width, height;
+		GetSize(width, height);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, width, 0, height, -1, 1);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		// If we got it, draw it
+		if (m_rayimage)
+		{
+			glRasterPos3i(0, 0, 0);
+			glDrawPixels(m_rayimagewidth, m_rayimageheight,
+				GL_RGB, GL_UNSIGNED_BYTE, m_rayimage[0]);
+		}
+
+		glFlush();
+	}
+	else
+	{
+		//
+		// Instantiate a renderer
+		//
+
+		COpenGLRenderer renderer;
+
+		// Configure the renderer
+		ConfigureRenderer(&renderer);
+
+		//
+		// Render the scene
+		//
+
+		renderer.Render(m_scene);
+	}
+}
+
+void CChildView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	m_camera.MouseDown(point.x, point.y);
+
+	COpenGLWnd::OnLButtonDown(nFlags, point);
+}
+
+
+void CChildView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_camera.MouseMove(point.x, point.y, nFlags))
+		Invalidate();
+
+	COpenGLWnd::OnMouseMove(nFlags, point);
+}
+
+
+void CChildView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	m_camera.MouseDown(point.x, point.y, 2);
+
+	COpenGLWnd::OnRButtonDown(nFlags, point);
+}
+
+//
+// Name :         CChildView::ConfigureRenderer()
+// Description :  Configures our renderer so it is able to render the scene.
+//                Indicates how we'll do our projection, where the camera is,
+//                and where any lights are located.
+//
+
+void CChildView::ConfigureRenderer(CGrRenderer* p_renderer)
+{
+	// Determine the screen size so we can determine the aspect ratio
+	int width, height;
+	GetSize(width, height);
+	double aspectratio = double(width) / double(height);
+
+	//
+	// Set up the camera in the renderer
+	//
+
+	p_renderer->Perspective(m_camera.FieldOfView(),
+		aspectratio, // The aspect ratio.
+		20., // Near clipping
+		1000.); // Far clipping
+
+	// m_camera.FieldOfView is the vertical field of view in degrees.
+
+	//
+	// Set the camera location
+	//
+
+	p_renderer->LookAt(m_camera.Eye()[0], m_camera.Eye()[1], m_camera.Eye()[2],
+		m_camera.Center()[0], m_camera.Center()[1], m_camera.Center()[2],
+		m_camera.Up()[0], m_camera.Up()[1], m_camera.Up()[2]);
+
+	//
+	// Set the light locations and colors
+	//
+
+	float dimd = 0.5f;
+	GLfloat dim[] = { dimd, dimd, dimd, 1.0f };
+	GLfloat brightwhite[] = { 1.f, 1.f, 1.f, 1.0f };
+
+	p_renderer->AddLight(CGrPoint(0, 20, 0),
+		dim, brightwhite, brightwhite);
+}
+
+
+void CChildView::OnRenderRaytrace()
+{
+	m_raytrace = !m_raytrace;
+	Invalidate();
+	if (!m_raytrace)
+		return;
+
+	GetSize(m_rayimagewidth, m_rayimageheight);
+
+	m_rayimage = new BYTE * [m_rayimageheight];
+
+	int rowwid = m_rayimagewidth * 3;
+	while (rowwid % 4)
+		rowwid++;
+
+	m_rayimage[0] = new BYTE[m_rayimageheight * rowwid];
+	for (int i = 1; i < m_rayimageheight; i++)
+	{
+		m_rayimage[i] = m_rayimage[0] + i * rowwid;
+	}
+
+	for (int i = 0; i < m_rayimageheight; i++)
+	{
+		// Fill the image with blue
+		for (int j = 0; j < m_rayimagewidth; j++)
+		{
+			m_rayimage[i][j * 3] = 0;               // red
+			m_rayimage[i][j * 3 + 1] = 0;           // green
+			m_rayimage[i][j * 3 + 2] = BYTE(255);   // blue
+		}
+	}
 	
-// Overrides
-	protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	// Instantiate a raytrace object
+	CMyRaytraceRenderer raytrace;
 
-// Implementation
-public:
-	virtual ~CChildView();
+	// Generic configurations for all renderers
+	ConfigureRenderer(&raytrace);
 
-	// Generated message map functions
-protected:
-	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnRenderRaytrace();
-	afx_msg void OnUpdateRenderRaytrace(CCmdUI* pCmdUI);
-};
+	//
+	// Render the Scene
+	//
+	raytrace.SetImage(m_rayimage, m_rayimagewidth, m_rayimageheight);
+	raytrace.SetWindow(this);
+	raytrace.Render(m_scene);
+	Invalidate();
+}
 
+
+void CChildView::OnUpdateRenderRaytrace(CCmdUI* pCmdUI)
+{
+	pCmdUI->SetCheck(m_raytrace);
+}
