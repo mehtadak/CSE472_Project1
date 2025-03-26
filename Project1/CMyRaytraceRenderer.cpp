@@ -167,14 +167,23 @@ bool CMyRaytraceRenderer::RendererEnd()
 									color[d] += material->Diffuse(d) * light.m_diffuse[d] * dotNormalLight;
 								}
 
-								//Specular Component
-								CGrPoint viewDir = Normalize3(Eye() - intersect);
-								CGrPoint reflectDir = lightDir - N * 2 * dotNormalLight;
-								float spec = pow(max(Dot3(viewDir, reflectDir), 0.0), material->Shininess());
-
-								for (int s = 0; s < 3; s++) {
-									color[s] += material->Specular(s) * light.m_specular[s] * spec;
+								// specular component
+								CGrPoint viewDirection = Normalize3(Eye() - intersect);
+								CGrPoint half = Normalize3(lightDir + viewDirection);
+								double sif = pow(max(Dot3(N, half), 0.0), material->Shininess());
+								for (int c = 0; c < 3; c++) {
+									color[c] += material->Specular(c) * light.m_specular[c] * sif;
 								}
+
+								//Specular Component
+								//CGrPoint viewDir = Normalize3(Eye() - intersect);
+								//CGrPoint reflectDir = lightDir - N * 2 * dotNormalLight;
+								//float spec = pow(max(Dot3(viewDir, reflectDir), 0.0), material->Shininess());
+
+								//for (int s = 0; s < 3; s++) {
+								//	color[s] += material->Specular(s) * light.m_specular[s] * spec;
+								//}
+
 							}
 						}
 					}

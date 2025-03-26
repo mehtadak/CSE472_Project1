@@ -76,6 +76,8 @@ CChildView::CChildView()
 	// tetrahedron
 	CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
 	tetPaint->AmbientAndDiffuse(1.0f, 0.5f, 0.0f); // orange
+	tetPaint->Specular(0.5f, 0.5f, 0.5f);
+	tetPaint->Shininess(100.0);
 	scene->Child(tetPaint);
 
 	CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
@@ -98,6 +100,8 @@ CChildView::CChildView()
 	// sphere
 	CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
 	spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
+	spherePaint->Specular(0.5f, 0.5f, 0.5f);
+	spherePaint->Shininess(100.0);
 	scene->Child(spherePaint);
 
 	CGrPtr<CGrComposite> sphere = new CGrComposite;
@@ -139,6 +143,8 @@ CChildView::CChildView()
 	// cylinder
 	CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
 	cylinderPaint->AmbientAndDiffuse(0.2f, 0.8f, 0.2f); // green
+	cylinderPaint->Specular(0.5f, 0.5f, 0.5f);
+	cylinderPaint->Shininess(50.0);
 	scene->Child(cylinderPaint);
 
 	CGrPtr<CGrComposite> cylinder = new CGrComposite;
