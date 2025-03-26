@@ -72,6 +72,108 @@ CChildView::CChildView()
 	bluepyramid->Poly3(top, base4, base1, NULL);
 	//base
 	bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+
+	// tetrahedron
+	CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
+	tetPaint->AmbientAndDiffuse(1.0f, 0.5f, 0.0f); // orange
+	scene->Child(tetPaint);
+
+	CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
+	tetPaint->Child(tetrahedron);
+
+	// tetrahedron vertices 
+	float edge = 3.0f;
+	float h = sqrt(2.0f / 3.0f) * edge;
+
+	CGrPoint v0(-5.0f - edge / 2, 0.0f, 0.0f);
+	CGrPoint v1(-5.0f + edge / 2, 0.0f, 0.0f);
+	CGrPoint v2(-5.0f, 0.0f, edge * sqrt(3.0f) / 2.0f);
+	CGrPoint v3(-5.0f, h, edge * sqrt(3.0f) / 6.0f);
+
+	tetrahedron->Poly3(v0, v1, v2, NULL);
+	tetrahedron->Poly3(v0, v2, v3, NULL);
+	tetrahedron->Poly3(v0, v3, v1, NULL);
+	tetrahedron->Poly3(v1, v3, v2, NULL);
+
+	// sphere
+	CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
+	spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
+	scene->Child(spherePaint);
+
+	CGrPtr<CGrComposite> sphere = new CGrComposite;
+	spherePaint->Child(sphere);
+
+	const float radius = 2.0f;
+	const CGrPoint center(0.0f, 5.0f, 0.0f);
+	const int stacks = 20;
+	const int slices = 20;
+
+	//sphere vertices
+	std::vector<CGrPoint> vertices;
+	for (int i = 0; i <= stacks; ++i) {
+		double phi = GR_PI * (-0.5 + (double)i / stacks);
+		double y = radius * sin(phi);
+		double r = radius * cos(phi);
+
+		for (int j = 0; j <= slices; ++j) {
+			double theta = 2 * GR_PI * j / slices;
+			double x = r * cos(theta);
+			double z = r * sin(theta);
+			vertices.push_back(center + CGrPoint(x, y, z));
+		}
+	}
+
+	//sphere triangles
+	for (int i = 0; i < stacks; ++i) {
+		for (int j = 0; j < slices; ++j) {
+			int i0 = i * (slices + 1) + j;
+			int i1 = i0 + 1;
+			int i2 = (i + 1) * (slices + 1) + j;
+			int i3 = i2 + 1;
+
+			sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
+			sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
+		}
+	}
+
+	// cylinder
+	CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
+	cylinderPaint->AmbientAndDiffuse(0.2f, 0.8f, 0.2f); // green
+	scene->Child(cylinderPaint);
+
+	CGrPtr<CGrComposite> cylinder = new CGrComposite;
+	cylinderPaint->Child(cylinder);
+
+	const float cylRadius = 1.5f;
+	const float cylHeight = 5.0f;
+	const CGrPoint cylBase(-10.0f, 0.0f, 0.0f);
+	const int segments = 20;
+
+	std::vector<CGrPoint> bottomPoints, topPoints;
+
+	//cylinder vertices
+	for (int i = 0; i < segments; ++i) {
+		double theta = 2 * GR_PI * i / segments;
+		double x = cylRadius * cos(theta);
+		double z = cylRadius * sin(theta);
+		bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
+		topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
+	}
+
+	//cylinder
+	for (int i = 0; i < segments; ++i) {
+		int next = (i + 1) % segments;
+
+		// sides
+		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
+
+		// bottom 
+		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
+
+		// top cap
+		CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
+		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
+	}
 }
 
 CChildView::~CChildView()
