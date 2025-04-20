@@ -26,24 +26,161 @@ CChildView::CChildView()
 	CGrPtr<CGrComposite> scene = new CGrComposite;
 	m_scene = scene;
 
-	// A red box
-	CGrPtr<CGrMaterial> redpaint = new CGrMaterial;
-	redpaint->AmbientAndDiffuse(0.8f, 0.0f, 0.0f);
-	scene->Child(redpaint);
+	//// A red box
+	//CGrPtr<CGrMaterial> redpaint = new CGrMaterial;
+	//redpaint->AmbientAndDiffuse(0.8f, 0.0f, 0.0f);
+	//scene->Child(redpaint);
 
-	CGrPtr<CGrComposite> redbox = new CGrComposite;
-	redpaint->Child(redbox);
-	redbox->Box(1, 1, 1, 5, 5, 5);
+	//CGrPtr<CGrComposite> redbox = new CGrComposite;
+	//redpaint->Child(redbox);
+	//redbox->Box(1, 1, 1, 5, 5, 5);
 
-	// A white box
-	CGrPtr<CGrMaterial> whitepaint = new CGrMaterial;
-	whitepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
-	scene->Child(whitepaint);
+	//// A white box
+	//CGrPtr<CGrMaterial> whitepaint = new CGrMaterial;
+	//whitepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
+	//scene->Child(whitepaint);
 
-	CGrPtr<CGrComposite> whitebox = new CGrComposite;
-	whitepaint->Child(whitebox);
-	whitebox->Box(-10, -10, -10, 5, 5, 5);
-	
+	//CGrPtr<CGrComposite> whitebox = new CGrComposite;
+	//whitepaint->Child(whitebox);
+	//whitebox->Box(-10, -10, -10, 5, 5, 5);
+	//
+	//// Floor
+	//CGrPtr<CGrMaterial> greenpaint = new CGrMaterial;
+	//greenpaint->AmbientAndDiffuse(0.1f, 0.8f, 0.1f);
+	//scene->Child(greenpaint);
+
+	//CGrPtr<CGrComposite> floor = new CGrComposite;
+	//greenpaint->Child(floor);
+	//floor->Box(-15, -18, -15, 30, 1, 30);
+
+	//// blue pyramid
+	//CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
+	//bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
+	//scene->Child(bluepaint);
+	//CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
+	//bluepaint->Child(bluepyramid);
+	////verts
+	//CGrPoint top(0.0f, 2.5f, 0.0f);
+	//CGrPoint base1(-3.0f, -3.0f, 3.0f);
+	//CGrPoint base2(3.0f, -3.0f, 3.0f);
+	//CGrPoint base3(3.0f, -3.0f, -3.0f);
+	//CGrPoint base4(-3.0f, -3.0f, -3.0f);
+	//// sides
+	//bluepyramid->Poly3(top, base1, base2, NULL);
+	//bluepyramid->Poly3(top, base2, base3, NULL);
+	//bluepyramid->Poly3(top, base3, base4, NULL);
+	//bluepyramid->Poly3(top, base4, base1, NULL);
+	////base
+	//bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+
+	//// tetrahedron
+	//CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
+	//tetPaint->AmbientAndDiffuse(1.0f, 0.5f, 0.0f); // orange
+	//tetPaint->Specular(0.5f, 0.5f, 0.5f);
+	//tetPaint->Shininess(100.0);
+	//scene->Child(tetPaint);
+
+	//CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
+	//tetPaint->Child(tetrahedron);
+
+	//// tetrahedron vertices 
+	//float edge = 3.0f;
+	//float h = sqrt(2.0f / 3.0f) * edge;
+
+	//CGrPoint v0(-5.0f - edge / 2, 0.0f, 0.0f);
+	//CGrPoint v1(-5.0f + edge / 2, 0.0f, 0.0f);
+	//CGrPoint v2(-5.0f, 0.0f, edge * sqrt(3.0f) / 2.0f);
+	//CGrPoint v3(-5.0f, h, edge * sqrt(3.0f) / 6.0f);
+
+	//tetrahedron->Poly3(v0, v1, v2, NULL);
+	//tetrahedron->Poly3(v0, v2, v3, NULL);
+	//tetrahedron->Poly3(v0, v3, v1, NULL);
+	//tetrahedron->Poly3(v1, v3, v2, NULL);
+
+	//// sphere
+	//CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
+	//spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
+	//spherePaint->Specular(0.5f, 0.5f, 0.5f);
+	//spherePaint->Shininess(100.0);
+	//scene->Child(spherePaint);
+
+	//CGrPtr<CGrComposite> sphere = new CGrComposite;
+	//spherePaint->Child(sphere);
+
+	//const float radius = 2.0f;
+	//const CGrPoint center(0.0f, 5.0f, 0.0f);
+	//const int stacks = 20;
+	//const int slices = 20;
+
+	////sphere vertices
+	//std::vector<CGrPoint> vertices;
+	//for (int i = 0; i <= stacks; ++i) {
+	//	double phi = GR_PI * (-0.5 + (double)i / stacks);
+	//	double y = radius * sin(phi);
+	//	double r = radius * cos(phi);
+
+	//	for (int j = 0; j <= slices; ++j) {
+	//		double theta = 2 * GR_PI * j / slices;
+	//		double x = r * cos(theta);
+	//		double z = r * sin(theta);
+	//		vertices.push_back(center + CGrPoint(x, y, z));
+	//	}
+	//}
+
+	////sphere triangles
+	//for (int i = 0; i < stacks; ++i) {
+	//	for (int j = 0; j < slices; ++j) {
+	//		int i0 = i * (slices + 1) + j;
+	//		int i1 = i0 + 1;
+	//		int i2 = (i + 1) * (slices + 1) + j;
+	//		int i3 = i2 + 1;
+
+	//		sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
+	//		sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
+	//	}
+	//}
+
+	//// cylinder
+	//CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
+	//cylinderPaint->AmbientAndDiffuse(0.2f, 0.8f, 0.2f); // green
+	//cylinderPaint->Specular(0.5f, 0.5f, 0.5f);
+	//cylinderPaint->Shininess(50.0);
+	//scene->Child(cylinderPaint);
+
+	//CGrPtr<CGrComposite> cylinder = new CGrComposite;
+	//cylinderPaint->Child(cylinder);
+
+	//const float cylRadius = 1.5f;
+	//const float cylHeight = 5.0f;
+	//const CGrPoint cylBase(-10.0f, 0.0f, 0.0f);
+	//const int segments = 20;
+
+	//std::vector<CGrPoint> bottomPoints, topPoints;
+
+	////cylinder vertices
+	//for (int i = 0; i < segments; ++i) {
+	//	double theta = 2 * GR_PI * i / segments;
+	//	double x = cylRadius * cos(theta);
+	//	double z = cylRadius * sin(theta);
+	//	bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
+	//	topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
+	//}
+
+	////cylinder
+	//for (int i = 0; i < segments; ++i) {
+	//	int next = (i + 1) % segments;
+
+	//	// sides
+	//	cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
+
+	//	// bottom 
+	//	cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
+
+	//	// top cap
+	//	CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
+	//	cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
+	//}
+
 	// Floor
 	CGrPtr<CGrMaterial> greenpaint = new CGrMaterial;
 	greenpaint->AmbientAndDiffuse(0.1f, 0.8f, 0.1f);
@@ -51,135 +188,74 @@ CChildView::CChildView()
 
 	CGrPtr<CGrComposite> floor = new CGrComposite;
 	greenpaint->Child(floor);
-	floor->Box(-15, -18, -15, 30, 1, 30);
+	floor->Box(-15, -5, -15, 30, 1, 30);
 
-	// blue pyramid
-	CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
-	bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
-	scene->Child(bluepaint);
-	CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
-	bluepaint->Child(bluepyramid);
-	//verts
-	CGrPoint top(0.0f, 2.5f, 0.0f);
-	CGrPoint base1(-3.0f, -3.0f, 3.0f);
-	CGrPoint base2(3.0f, -3.0f, 3.0f);
-	CGrPoint base3(3.0f, -3.0f, -3.0f);
-	CGrPoint base4(-3.0f, -3.0f, -3.0f);
-	// sides
-	bluepyramid->Poly3(top, base1, base2, NULL);
-	bluepyramid->Poly3(top, base2, base3, NULL);
-	bluepyramid->Poly3(top, base3, base4, NULL);
-	bluepyramid->Poly3(top, base4, base1, NULL);
-	//base
-	bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+	//// House Walls
+	CGrPtr<CGrMaterial> housePaint = new CGrMaterial;
+	housePaint->AmbientAndDiffuse(0.9f, 0.7f, 0.5f); // light brown
+	scene->Child(housePaint);
 
-	// tetrahedron
-	CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
-	tetPaint->AmbientAndDiffuse(1.0f, 0.5f, 0.0f); // orange
-	tetPaint->Specular(0.5f, 0.5f, 0.5f);
-	tetPaint->Shininess(100.0);
-	scene->Child(tetPaint);
+	CGrPtr<CGrComposite> house = new CGrComposite;
+	housePaint->Child(house);
+	// Position: x = -5, y = -4 (1 unit above floor), z = -5, Size: width = 10, height = 6, depth = 10
+	house->Box(-5, -4, -5, 10, 6, 10);
 
-	CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
-	tetPaint->Child(tetrahedron);
+	//// Roof (triangle prism)
+	CGrPtr<CGrMaterial> roofPaint = new CGrMaterial;
+	roofPaint->AmbientAndDiffuse(0.5f, 0.1f, 0.1f); // dark red
+	scene->Child(roofPaint);
 
-	// tetrahedron vertices 
-	float edge = 3.0f;
-	float h = sqrt(2.0f / 3.0f) * edge;
+	CGrPtr<CGrComposite> roof = new CGrComposite;
+	roofPaint->Child(roof);
 
-	CGrPoint v0(-5.0f - edge / 2, 0.0f, 0.0f);
-	CGrPoint v1(-5.0f + edge / 2, 0.0f, 0.0f);
-	CGrPoint v2(-5.0f, 0.0f, edge * sqrt(3.0f) / 2.0f);
-	CGrPoint v3(-5.0f, h, edge * sqrt(3.0f) / 6.0f);
+	CGrPoint roofFrontLeft(-5, 2, -5);
+	CGrPoint roofFrontRight(5, 2, -5);
+	CGrPoint roofBackLeft(-5, 2, 5);
+	CGrPoint roofBackRight(5, 2, 5);
+	CGrPoint roofPeak(0, 6, 0);
 
-	tetrahedron->Poly3(v0, v1, v2, NULL);
-	tetrahedron->Poly3(v0, v2, v3, NULL);
-	tetrahedron->Poly3(v0, v3, v1, NULL);
-	tetrahedron->Poly3(v1, v3, v2, NULL);
+// Front triangle (CCW from outside)
+	roof->Poly3(roofFrontLeft, roofPeak, roofFrontRight);
 
-	// sphere
-	CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
-	spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
-	spherePaint->Specular(0.5f, 0.5f, 0.5f);
-	spherePaint->Shininess(100.0);
-	scene->Child(spherePaint);
+	// Right triangle (CCW from outside)
+	roof->Poly3(roofFrontRight, roofPeak, roofBackRight);
 
-	CGrPtr<CGrComposite> sphere = new CGrComposite;
-	spherePaint->Child(sphere);
+	// Back triangle (CCW from outside)
+	roof->Poly3(roofBackRight, roofPeak, roofBackLeft);
 
-	const float radius = 2.0f;
-	const CGrPoint center(0.0f, 5.0f, 0.0f);
-	const int stacks = 20;
-	const int slices = 20;
+	// Left triangle (CCW from outside)
+	roof->Poly3(roofBackLeft, roofPeak, roofFrontLeft);
 
-	//sphere vertices
-	std::vector<CGrPoint> vertices;
-	for (int i = 0; i <= stacks; ++i) {
-		double phi = GR_PI * (-0.5 + (double)i / stacks);
-		double y = radius * sin(phi);
-		double r = radius * cos(phi);
 
-		for (int j = 0; j <= slices; ++j) {
-			double theta = 2 * GR_PI * j / slices;
-			double x = r * cos(theta);
-			double z = r * sin(theta);
-			vertices.push_back(center + CGrPoint(x, y, z));
-		}
-	}
 
-	//sphere triangles
-	for (int i = 0; i < stacks; ++i) {
-		for (int j = 0; j < slices; ++j) {
-			int i0 = i * (slices + 1) + j;
-			int i1 = i0 + 1;
-			int i2 = (i + 1) * (slices + 1) + j;
-			int i3 = i2 + 1;
+	//// Door
+	CGrPtr<CGrMaterial> doorPaint = new CGrMaterial;
+	doorPaint->AmbientAndDiffuse(0.4f, 0.2f, 0.1f); // dark brown
+	scene->Child(doorPaint);
 
-			sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
-			sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
-		}
-	}
+	CGrPtr<CGrComposite> door = new CGrComposite;
+	doorPaint->Child(door);
+	// Positioned on the front wall
+	door->Box(-1, -4, -5.01f, 2, 4, 0.02f);
 
-	// cylinder
-	CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
-	cylinderPaint->AmbientAndDiffuse(0.2f, 0.8f, 0.2f); // green
-	cylinderPaint->Specular(0.5f, 0.5f, 0.5f);
-	cylinderPaint->Shininess(50.0);
-	scene->Child(cylinderPaint);
+	//// Window (left blank space)
+	// Instead of a geometry object, just leave this space out of the wall.
+	// Optionally, if you want a frame, add thin borders around a hole:
+	CGrPtr<CGrMaterial> framePaint = new CGrMaterial;
+	framePaint->AmbientAndDiffuse(0.2f, 0.2f, 0.2f); // gray frame
+	scene->Child(framePaint);
 
-	CGrPtr<CGrComposite> cylinder = new CGrComposite;
-	cylinderPaint->Child(cylinder);
-
-	const float cylRadius = 1.5f;
-	const float cylHeight = 5.0f;
-	const CGrPoint cylBase(-10.0f, 0.0f, 0.0f);
-	const int segments = 20;
-
-	std::vector<CGrPoint> bottomPoints, topPoints;
-
-	//cylinder vertices
-	for (int i = 0; i < segments; ++i) {
-		double theta = 2 * GR_PI * i / segments;
-		double x = cylRadius * cos(theta);
-		double z = cylRadius * sin(theta);
-		bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
-		topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
-	}
-
-	//cylinder
-	for (int i = 0; i < segments; ++i) {
-		int next = (i + 1) % segments;
-
-		// sides
-		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
-
-		// bottom 
-		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
-
-		// top cap
-		CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
-		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
-	}
+	CGrPtr<CGrComposite> windowFrame = new CGrComposite;
+	framePaint->Child(windowFrame);
+	// Frame around window at left side wall
+	// Top
+	windowFrame->Box(-5.01f, -0.5f, -1.0f, 0.02f, 0.2f, 2.0f);
+	// Bottom
+	windowFrame->Box(-5.01f, -2.5f, -1.0f, 0.02f, 0.2f, 2.0f);
+	// Left side
+	windowFrame->Box(-5.01f, -2.5f, -1.0f, 0.02f, 2.2f, 0.2f);
+	// Right side
+	windowFrame->Box(-5.01f, -2.5f, 0.8f, 0.02f, 2.2f, 0.2f);
 }
 
 CChildView::~CChildView()
