@@ -21,7 +21,14 @@ CChildView::CChildView()
 	m_camera.Set(20., 10., 50., 0., 0., 0., 0., 1., 0.);
 
 	m_raytrace = false;
+	m_fogEnabled = false;
 	m_rayimage = NULL;
+
+	// Initialize fog properties here
+	m_fogDensity = 0.02; // Example density
+	m_fogColor[0] = 0.7f; // Red component (light gray)
+	m_fogColor[1] = 0.7f; // Green component
+	m_fogColor[2] = 0.7f; // Blue component
 
 	CGrPtr<CGrComposite> scene = new CGrComposite;
 	m_scene = scene;
@@ -256,6 +263,8 @@ CChildView::CChildView()
 	windowFrame->Box(-5.01f, -2.5f, -1.0f, 0.02f, 2.2f, 0.2f);
 	// Right side
 	windowFrame->Box(-5.01f, -2.5f, 0.8f, 0.02f, 2.2f, 0.2f);
+
+
 }
 
 CChildView::~CChildView()
@@ -270,6 +279,8 @@ BEGIN_MESSAGE_MAP(CChildView, COpenGLWnd)
 	ON_WM_MOUSEMOVE()
 	ON_COMMAND(ID_RENDER_RAYTRACE, &CChildView::OnRenderRaytrace)
 	ON_UPDATE_COMMAND_UI(ID_RENDER_RAYTRACE, &CChildView::OnUpdateRenderRaytrace)
+	ON_COMMAND(ID_RENDER_FOG, &CChildView::OnRenderFog)
+	ON_UPDATE_COMMAND_UI(ID_RENDER_FOG, &CChildView::OnUpdateRenderFog)
 END_MESSAGE_MAP()
 
 
@@ -404,6 +415,13 @@ void CChildView::ConfigureRenderer(CGrRenderer* p_renderer)
 
 	p_renderer->AddLight(CGrPoint(0, 20, 0),
 		dim, brightwhite, brightwhite);
+
+	// If it's a raytracer, set the fog properties
+	CMyRaytraceRenderer* rayRenderer = dynamic_cast<CMyRaytraceRenderer*>(p_renderer);
+	if (rayRenderer) {
+		rayRenderer->SetFog(m_fogDensity, m_fogColor[0], m_fogColor[1], m_fogColor[2]);
+		rayRenderer->EnableFog(m_fogEnabled);
+	}
 }
 
 
@@ -458,4 +476,23 @@ void CChildView::OnRenderRaytrace()
 void CChildView::OnUpdateRenderRaytrace(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(m_raytrace);
+}
+
+
+void CChildView::OnRenderFog()
+{
+	// TODO: Add your command handler code here
+	m_fogEnabled = !m_fogEnabled;
+	Invalidate();
+	//if (m_fogEnabled) {
+	OnRenderRaytrace();
+	//}
+	Invalidate();
+}
+
+
+void CChildView::OnUpdateRenderFog(CCmdUI* pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_fogEnabled);
 }

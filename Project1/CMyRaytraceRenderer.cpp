@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CMyRaytraceRenderer.h"
+#include <cmath>
 
 void CMyRaytraceRenderer::SetWindow(CWnd* p_window)
 {
@@ -123,9 +124,9 @@ bool CMyRaytraceRenderer::RendererEnd()
 			// Construct a Ray
 			CRay ray(CGrPoint(0, 0, 0), Normalize3(CGrPoint(x, y, -1, 0)));
 
-			double t;                                   // Will be distance to intersection
-			CGrPoint intersect;                         // Will by x,y,z location of intersection
-			const CRayIntersection::Object* nearest;    // Pointer to intersecting object
+			double t; 					  // Will be distance to intersection
+			CGrPoint intersect; 		  // Will by x,y,z location of intersection
+			const CRayIntersection::Object* nearest;  // Pointer to intersecting object
 			if (m_intersection.Intersect(ray, 1e20, NULL, nearest, t, intersect))
 			{
 				// We hit something...
@@ -138,20 +139,20 @@ bool CMyRaytraceRenderer::RendererEnd()
 				m_intersection.IntersectInfo(ray, nearest, t,
 					N, material, texture, texcoord);
 
+				double surfaceColor[3] = { 0, 0, 0 };
 				if (material != NULL)
 				{
-					double color[] = { 0, 0, 0 };
 					for (int i = 0; i < LightCnt(); i++)
 					{
 						const Light& light = GetLight(i);
 
 						//Ambient Component
 						for (int a = 0; a < 3; a++) {
-							color[a] += material->Ambient(a) * light.m_ambient[a];
+							surfaceColor[a] += material->Ambient(a) * light.m_ambient[a];
 						}
 
 						CGrPoint lightDir = Normalize3(light.m_pos - intersect);
-						CRay shadowRay(intersect, lightDir);
+						CRay shadowRay(intersect + N * 0.0001, lightDir); // Add a small offset to avoid self-intersection
 						CGrPoint shadowIntersect;
 						const CRayIntersection::Object* shadowNearest;
 						double shadowT;
@@ -164,7 +165,7 @@ bool CMyRaytraceRenderer::RendererEnd()
 							{
 								//Diffuse Component
 								for (int d = 0; d < 3; d++) {
-									color[d] += material->Diffuse(d) * light.m_diffuse[d] * dotNormalLight;
+									surfaceColor[d] += material->Diffuse(d) * light.m_diffuse[d] * dotNormalLight;
 								}
 
 								// specular component
@@ -172,18 +173,8 @@ bool CMyRaytraceRenderer::RendererEnd()
 								CGrPoint half = Normalize3(lightDir + viewDirection);
 								double sif = pow(max(Dot3(N, half), 0.0), material->Shininess());
 								for (int c = 0; c < 3; c++) {
-									color[c] += material->Specular(c) * light.m_specular[c] * sif;
+									surfaceColor[c] += material->Specular(c) * light.m_specular[c] * sif;
 								}
-
-								//Specular Component
-								//CGrPoint viewDir = Normalize3(Eye() - intersect);
-								//CGrPoint reflectDir = lightDir - N * 2 * dotNormalLight;
-								//float spec = pow(max(Dot3(viewDir, reflectDir), 0.0), material->Shininess());
-
-								//for (int s = 0; s < 3; s++) {
-								//	color[s] += material->Specular(s) * light.m_specular[s] * spec;
-								//}
-
 							}
 						}
 					}
@@ -194,28 +185,50 @@ bool CMyRaytraceRenderer::RendererEnd()
 						texture->Pixel(texcoord.X(), texcoord.Y(), texColor);
 						for (int j = 0; j < 3; j++)
 						{
-							color[j] *= texColor[j];
+							surfaceColor[j] *= texColor[j];
 						}
 					}
 
-					// Clamp values to [0,1] before scaling to [0,255]
-					for (int i = 0; i < 3; i++) {
-						color[i] = max(0.0, min(color[i], 1.0));
+					if (m_fogEnabled)
+					{
+						double distance = intersect.Length3(); // Distance from the camera
+						double fogFactor = CalculateFogFactor(distance);
+						for (int i = 0; i < 3; ++i) {
+							colorTotal[i] = fogFactor * surfaceColor[i] + (1 - fogFactor) * m_fogColor[i];
+						}
 					}
-
-					m_rayimage[r][c * 3] = BYTE(color[0] * 255);
-					m_rayimage[r][c * 3 + 1] = BYTE(color[1] * 255);
-					m_rayimage[r][c * 3 + 2] = BYTE(color[2] * 255);
+					else
+					{
+						for (int i = 0; i < 3; ++i) {
+							colorTotal[i] = surfaceColor[i]; // No fog, use surface color directly
+						}
+					}
 				}
-
 			}
 			else
 			{
-				// We hit nothing...
-				m_rayimage[r][c * 3] = 0;
-				m_rayimage[r][c * 3 + 1] = 0;
-				m_rayimage[r][c * 3 + 2] = 0;
+				if (m_fogEnabled)
+				{
+					for (int i = 0; i < 3; ++i) {
+						colorTotal[i] = m_fogColor[i];
+					}
+				}
+				else
+				{
+					m_rayimage[r][c * 3] = 0;
+					m_rayimage[r][c * 3 + 1] = 0;
+					m_rayimage[r][c * 3 + 2] = 0;
+				}
 			}
+
+			// Clamp values to [0,1] before scaling to [0,255]
+			for (int i = 0; i < 3; i++) {
+				colorTotal[i] = max(0.0, min(colorTotal[i], 1.0));
+			}
+
+			m_rayimage[r][c * 3] = BYTE(colorTotal[0] * 255);
+			m_rayimage[r][c * 3 + 1] = BYTE(colorTotal[1] * 255);
+			m_rayimage[r][c * 3 + 2] = BYTE(colorTotal[2] * 255);
 		}
 		if ((r % 50) == 0)
 		{
@@ -225,7 +238,5 @@ bool CMyRaytraceRenderer::RendererEnd()
 				DispatchMessage(&msg);
 		}
 	}
-
-
 	return true;
 }
