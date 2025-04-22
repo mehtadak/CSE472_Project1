@@ -197,17 +197,16 @@ CChildView::CChildView()
 	greenpaint->Child(floor);
 	floor->Box(-15, -5, -15, 30, 1, 30);
 
-	//// House Walls
+	// House Walls
 	CGrPtr<CGrMaterial> housePaint = new CGrMaterial;
 	housePaint->AmbientAndDiffuse(0.9f, 0.7f, 0.5f); // light brown
 	scene->Child(housePaint);
 
 	CGrPtr<CGrComposite> house = new CGrComposite;
 	housePaint->Child(house);
-	// Position: x = -5, y = -4 (1 unit above floor), z = -5, Size: width = 10, height = 6, depth = 10
 	house->Box(-5, -4, -5, 10, 6, 10);
 
-	//// Roof (triangle prism)
+	// Roof
 	CGrPtr<CGrMaterial> roofPaint = new CGrMaterial;
 	roofPaint->AmbientAndDiffuse(0.5f, 0.1f, 0.1f); // dark red
 	scene->Child(roofPaint);
@@ -221,21 +220,21 @@ CChildView::CChildView()
 	CGrPoint roofBackRight(5, 2, 5);
 	CGrPoint roofPeak(0, 6, 0);
 
-// Front triangle (CCW from outside)
+	// Front triangle
 	roof->Poly3(roofFrontLeft, roofPeak, roofFrontRight);
 
-	// Right triangle (CCW from outside)
+	// Right triangle
 	roof->Poly3(roofFrontRight, roofPeak, roofBackRight);
 
-	// Back triangle (CCW from outside)
+	// Back triangle
 	roof->Poly3(roofBackRight, roofPeak, roofBackLeft);
 
-	// Left triangle (CCW from outside)
+	// Left triangle
 	roof->Poly3(roofBackLeft, roofPeak, roofFrontLeft);
 
 
 
-	//// Door
+	// Door
 	CGrPtr<CGrMaterial> doorPaint = new CGrMaterial;
 	doorPaint->AmbientAndDiffuse(0.4f, 0.2f, 0.1f); // dark brown
 	scene->Child(doorPaint);
@@ -245,9 +244,7 @@ CChildView::CChildView()
 	// Positioned on the front wall
 	door->Box(-1, -4, -5.01f, 2, 4, 0.02f);
 
-	//// Window (left blank space)
-	// Instead of a geometry object, just leave this space out of the wall.
-	// Optionally, if you want a frame, add thin borders around a hole:
+	// Window
 	CGrPtr<CGrMaterial> framePaint = new CGrMaterial;
 	framePaint->AmbientAndDiffuse(0.2f, 0.2f, 0.2f); // gray frame
 	scene->Child(framePaint);
