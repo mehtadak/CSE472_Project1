@@ -103,140 +103,136 @@ void CMyRaytraceRenderer::RendererEndPolygon()
 
 bool CMyRaytraceRenderer::RendererEnd()
 {
-	m_intersection.LoadingComplete();
+    m_intersection.LoadingComplete();
 
-	double ymin = -tan(ProjectionAngle() / 2 * GR_DTOR);
-	double yhit = -ymin * 2;
+    double ymin = -tan(ProjectionAngle() / 2 * GR_DTOR);
+    double yhit = -ymin * 2;
 
-	double xmin = ymin * ProjectionAspect();
-	double xwid = -xmin * 2;
+    double xmin = ymin * ProjectionAspect();
+    double xwid = -xmin * 2;
 
-	for (int r = 0; r < m_rayimageheight; r++)
-	{
-		for (int c = 0; c < m_rayimagewidth; c++)
-		{
-			double colorTotal[3] = { 0, 0, 0 };
+    int numSamples = 2; 
 
-			double x = xmin + (c + 0.5) / m_rayimagewidth * xwid;
-			double y = ymin + (r + 0.5) / m_rayimageheight * yhit;
+    for (int r = 0; r < m_rayimageheight; r++)
+    {
+        for (int c = 0; c < m_rayimagewidth; c++)
+        {
+            double colorTotal[3] = { 0, 0, 0 };
 
+            for (int sx = 0; sx < numSamples; sx++)
+            {
+                for (int sy = 0; sy < numSamples; sy++)
+                {
+                    double xOffset = (sx + 0.5) / numSamples;
+                    double yOffset = (sy + 0.5) / numSamples;
 
-			// Construct a Ray
-			CRay ray(CGrPoint(0, 0, 0), Normalize3(CGrPoint(x, y, -1, 0)));
+                    double x = xmin + (c + xOffset) / m_rayimagewidth * xwid;
+                    double y = ymin + (r + yOffset) / m_rayimageheight * yhit;
 
-			double t; 					  // Will be distance to intersection
-			CGrPoint intersect; 		  // Will by x,y,z location of intersection
-			const CRayIntersection::Object* nearest;  // Pointer to intersecting object
-			if (m_intersection.Intersect(ray, 1e20, NULL, nearest, t, intersect))
-			{
-				// We hit something...
-				// Determine information about the intersection
-				CGrPoint N;
-				CGrMaterial* material;
-				CGrTexture* texture;
-				CGrPoint texcoord;
+                    CRay ray(CGrPoint(0, 0, 0), Normalize3(CGrPoint(x, y, -1)));
 
-				m_intersection.IntersectInfo(ray, nearest, t,
-					N, material, texture, texcoord);
+                    double t;
+                    CGrPoint intersect;
+                    const CRayIntersection::Object* nearest;
+                    if (m_intersection.Intersect(ray, 1e20, NULL, nearest, t, intersect))
+                    {
+                        CGrPoint N;
+                        CGrMaterial* material;
+                        CGrTexture* texture;
+                        CGrPoint texcoord;
 
-				double surfaceColor[3] = { 0, 0, 0 };
-				if (material != NULL)
-				{
-					for (int i = 0; i < LightCnt(); i++)
-					{
-						const Light& light = GetLight(i);
+                        m_intersection.IntersectInfo(ray, nearest, t, N, material, texture, texcoord);
 
-						//Ambient Component
-						for (int a = 0; a < 3; a++) {
-							surfaceColor[a] += material->Ambient(a) * light.m_ambient[a];
-						}
+                        double surfaceColor[3] = { 0, 0, 0 };
+                        if (material != NULL)
+                        {
+                            for (int i = 0; i < LightCnt(); i++)
+                            {
+                                const Light& light = GetLight(i);
 
-						CGrPoint lightDir = Normalize3(light.m_pos - intersect);
-						CRay shadowRay(intersect + N * 0.0001, lightDir); // Add a small offset to avoid self-intersection
-						CGrPoint shadowIntersect;
-						const CRayIntersection::Object* shadowNearest;
-						double shadowT;
+                                for (int a = 0; a < 3; a++) {
+                                    surfaceColor[a] += material->Ambient(a) * light.m_ambient[a];
+                                }
 
-						//No Shadow!!! Add Diffuse and specular components
-						if (!m_intersection.Intersect(shadowRay, 1e20, nearest, shadowNearest, shadowT, shadowIntersect))
-						{
-							double dotNormalLight = Dot3(N, lightDir);
-							if (dotNormalLight > 0)
-							{
-								//Diffuse Component
-								for (int d = 0; d < 3; d++) {
-									surfaceColor[d] += material->Diffuse(d) * light.m_diffuse[d] * dotNormalLight;
-								}
+                                CGrPoint lightDir = Normalize3(light.m_pos - intersect);
+                                CRay shadowRay(intersect + N * 0.0001, lightDir);
+                                const CRayIntersection::Object* shadowNearest;
+                                double shadowT;
+                                CGrPoint shadowIntersect;
 
-								// specular component
-								CGrPoint viewDirection = Normalize3(Eye() - intersect);
-								CGrPoint half = Normalize3(lightDir + viewDirection);
-								double sif = pow(max(Dot3(N, half), 0.0), material->Shininess());
-								for (int c = 0; c < 3; c++) {
-									surfaceColor[c] += material->Specular(c) * light.m_specular[c] * sif;
-								}
-							}
-						}
-					}
+                                if (!m_intersection.Intersect(shadowRay, 1e20, nearest, shadowNearest, shadowT, shadowIntersect))
+                                {
+                                    double dotNormalLight = Dot3(N, lightDir);
+                                    if (dotNormalLight > 0)
+                                    {
+                                        for (int d = 0; d < 3; d++) {
+                                            surfaceColor[d] += material->Diffuse(d) * light.m_diffuse[d] * dotNormalLight;
+                                        }
 
-					if (texture != NULL)
-					{
-						float texColor[3];
-						texture->Pixel(texcoord.X(), texcoord.Y(), texColor);
-						for (int j = 0; j < 3; j++)
-						{
-							surfaceColor[j] *= texColor[j];
-						}
-					}
+                                        CGrPoint viewDirection = Normalize3(Eye() - intersect);
+                                        CGrPoint half = Normalize3(lightDir + viewDirection);
+                                        double sif = pow(max(Dot3(N, half), 0.0), material->Shininess());
+                                        for (int sp = 0; sp < 3; sp++) {
+                                            surfaceColor[sp] += material->Specular(sp) * light.m_specular[sp] * sif;
+                                        }
+                                    }
+                                }
+                            }
 
-					if (m_fogEnabled)
-					{
-						double distance = intersect.Length3(); // Distance from the camera
-						double fogFactor = CalculateFogFactor(distance);
-						for (int i = 0; i < 3; ++i) {
-							colorTotal[i] = fogFactor * surfaceColor[i] + (1 - fogFactor) * m_fogColor[i];
-						}
-					}
-					else
-					{
-						for (int i = 0; i < 3; ++i) {
-							colorTotal[i] = surfaceColor[i]; // No fog, use surface color directly
-						}
-					}
-				}
-			}
-			else
-			{
-				if (m_fogEnabled)
-				{
-					for (int i = 0; i < 3; ++i) {
-						colorTotal[i] = m_fogColor[i];
-					}
-				}
-				else
-				{
-					m_rayimage[r][c * 3] = 0;
-					m_rayimage[r][c * 3 + 1] = 0;
-					m_rayimage[r][c * 3 + 2] = 0;
-				}
-			}
+                            if (texture != NULL)
+                            {
+                                float texColor[3];
+                                texture->Pixel(texcoord.X(), texcoord.Y(), texColor);
+                                for (int j = 0; j < 3; j++) {
+                                    surfaceColor[j] *= texColor[j];
+                                }
+                            }
 
-			// Clamp values to [0,1] before scaling to [0,255]
-			for (int i = 0; i < 3; i++) {
-				colorTotal[i] = max(0.0, min(colorTotal[i], 1.0));
-			}
+                            if (m_fogEnabled)
+                            {
+                                double distance = intersect.Length3();
+                                double fogFactor = exp(-m_fogDensity * distance);
+                                for (int i = 0; i < 3; ++i) {
+                                    surfaceColor[i] = fogFactor * surfaceColor[i] + (1 - fogFactor) * m_fogColor[i];
+                                }
+                            }
+                        }
 
-			m_rayimage[r][c * 3] = BYTE(colorTotal[0] * 255);
-			m_rayimage[r][c * 3 + 1] = BYTE(colorTotal[1] * 255);
-			m_rayimage[r][c * 3 + 2] = BYTE(colorTotal[2] * 255);
-		}
-		if ((r % 50) == 0)
-		{
-			m_window->Invalidate();
-			MSG msg;
-			while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				DispatchMessage(&msg);
-		}
-	}
-	return true;
+                        colorTotal[0] += surfaceColor[0];
+                        colorTotal[1] += surfaceColor[1];
+                        colorTotal[2] += surfaceColor[2];
+                    }
+                    else
+                    {
+                        if (m_fogEnabled)
+                        {
+                            colorTotal[0] += m_fogColor[0];
+                            colorTotal[1] += m_fogColor[1];
+                            colorTotal[2] += m_fogColor[2];
+                        }
+                    }
+                }
+            }
+
+            colorTotal[0] /= (numSamples * numSamples);
+            colorTotal[1] /= (numSamples * numSamples);
+            colorTotal[2] /= (numSamples * numSamples);
+
+            for (int i = 0; i < 3; i++) {
+                colorTotal[i] = max(0.0, min(colorTotal[i], 1.0));
+                m_rayimage[r][c * 3 + i] = BYTE(colorTotal[i] * 255);
+            }
+        }
+
+        if ((r % 50) == 0)
+        {
+            m_window->Invalidate();
+            MSG msg;
+            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+                DispatchMessage(&msg);
+        }
+    }
+
+    return true;
 }
+
