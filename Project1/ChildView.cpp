@@ -261,7 +261,74 @@ CChildView::CChildView()
 	// Right side
 	windowFrame->Box(-5.01f, -2.5f, 0.8f, 0.02f, 2.2f, 0.2f);
 
+	//tree stump
+	CGrPtr<CGrTexture> woodPaint = new CGrTexture;
+	woodPaint->LoadFile(L"textures/plank01.bmp");
+	scene->Child(woodPaint);
+	glBindTexture(GL_TEXTURE_2D, woodPaint->TexName());
+	CGrPtr<CGrComposite> cylinder = new CGrComposite;
 
+	CGrPtr<CGrMaterial> brownPaint = new CGrMaterial;
+	brownPaint->AmbientAndDiffuse(0.3f, 0.1f, 0.1f); // dark red
+	scene->Child(brownPaint);
+
+	brownPaint->Child(cylinder);	
+
+	const float cylRadius = 1.5f;
+	const float cylHeight = 5.0f;
+	const CGrPoint cylBase(-10.0f, -4.0f, -10.0f);
+	const int segments = 20;
+
+	std::vector<CGrPoint> bottomPoints, topPoints;
+
+	// cylinder vertices
+	for (int i = 0; i < segments; ++i) {
+		double theta = 2 * GR_PI * i / segments;
+		double x = cylRadius * cos(theta);
+		double z = cylRadius * sin(theta);
+		bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
+		topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
+	}
+
+	//cylinder
+	for (int i = 0; i < segments; ++i) {
+		int next = (i + 1) % segments;
+
+		// sides
+		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
+
+		// bottom 
+		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
+
+		// top cap
+		CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
+		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
+	}
+	glDisable(GL_TEXTURE_2D);
+
+	// tetrahedron
+	CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
+	tetPaint->AmbientAndDiffuse(0.019f, 0.284f, 0.164f); // dark green
+	tetPaint->Specular(0.5f, 0.5f, 0.5f);
+	tetPaint->Shininess(100.0);
+	scene->Child(tetPaint);
+
+	CGrPtr<CGrComposite> tetrahedron = new CGrComposite;
+	tetPaint->Child(tetrahedron);
+
+	// tetrahedron vertices 
+	float edge = 6.0f;
+	float h = sqrt(2.0f / 3.0f) * edge;
+
+	CGrPoint v0(-5.0f - edge / 2 - 5.0f, 1.0f, -12.0f);
+	CGrPoint v1(-5.0f + edge / 2 - 5.0f, 1.0f, -12.0f);
+	CGrPoint v2(-5.0f - 5.0f, 1.0f, edge * sqrt(3.0f) / 2.0f - 12.0f);
+	CGrPoint v3(-5.0f - 5.0f, h + 1.0f, edge * sqrt(3.0f) / 6.0f - 12.0f);
+
+	tetrahedron->Poly3(v0, v1, v2, NULL);
+	tetrahedron->Poly3(v0, v2, v3, NULL);
+	tetrahedron->Poly3(v0, v3, v1, NULL);
+	tetrahedron->Poly3(v1, v3, v2, NULL);
 }
 
 CChildView::~CChildView()

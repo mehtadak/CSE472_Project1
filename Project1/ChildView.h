@@ -2,6 +2,7 @@
 #include "graphics/OpenGLWnd.h"
 #include "graphics/GrCamera.h"
 #include "graphics/GrObject.h"
+#include "graphics/GrTexture.h"
 
 // CChildView window
 
@@ -25,6 +26,8 @@ public:
 
     CGrPtr<CGrComposite> m_fogVolume;
     CGrTransform m_fogTransform;
+
+    CGrTexture m_woodTex;
 
 private:
     BYTE** m_rayimage;
