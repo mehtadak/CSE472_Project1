@@ -67,7 +67,7 @@ CChildView::CChildView()
 	//CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
 	//bluepaint->Child(bluepyramid);
 	////verts
-	//CGrPoint top(0.0f, 2.5f, 0.0f);
+	CGrPoint top(0.0f, 2.5f, 0.0f);
 	//CGrPoint base1(-3.0f, -3.0f, 3.0f);
 	//CGrPoint base2(3.0f, -3.0f, 3.0f);
 	//CGrPoint base3(3.0f, -3.0f, -3.0f);
@@ -104,48 +104,48 @@ CChildView::CChildView()
 	//tetrahedron->Poly3(v0, v3, v1, NULL);
 	//tetrahedron->Poly3(v1, v3, v2, NULL);
 
-	//// sphere
-	//CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
-	//spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
-	//spherePaint->Specular(0.5f, 0.5f, 0.5f);
-	//spherePaint->Shininess(100.0);
-	//scene->Child(spherePaint);
+	// sphere
+	CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
+	spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
+	spherePaint->Specular(0.5f, 0.5f, 0.5f);
+	spherePaint->Shininess(100.0);
+	scene->Child(spherePaint);
 
-	//CGrPtr<CGrComposite> sphere = new CGrComposite;
-	//spherePaint->Child(sphere);
+	CGrPtr<CGrComposite> sphere = new CGrComposite;
+	spherePaint->Child(sphere);
 
-	//const float radius = 2.0f;
-	//const CGrPoint center(0.0f, 5.0f, 0.0f);
-	//const int stacks = 20;
-	//const int slices = 20;
+	const float radius = 1.0f;
+	const CGrPoint center(-10.0f, -3.0f, 0.0f);
+	const int stacks = 20;
+	const int slices = 20;
 
-	////sphere vertices
-	//std::vector<CGrPoint> vertices;
-	//for (int i = 0; i <= stacks; ++i) {
-	//	double phi = GR_PI * (-0.5 + (double)i / stacks);
-	//	double y = radius * sin(phi);
-	//	double r = radius * cos(phi);
+	//sphere vertices
+	std::vector<CGrPoint> vertices;
+	for (int i = 0; i <= stacks; ++i) {
+		double phi = GR_PI * (-0.5 + (double)i / stacks);
+		double y = radius * sin(phi);
+		double r = radius * cos(phi);
 
-	//	for (int j = 0; j <= slices; ++j) {
-	//		double theta = 2 * GR_PI * j / slices;
-	//		double x = r * cos(theta);
-	//		double z = r * sin(theta);
-	//		vertices.push_back(center + CGrPoint(x, y, z));
-	//	}
-	//}
+		for (int j = 0; j <= slices; ++j) {
+			double theta = 2 * GR_PI * j / slices;
+			double x = r * cos(theta);
+			double z = r * sin(theta);
+			vertices.push_back(center + CGrPoint(x, y, z));
+		}
+	}
 
-	////sphere triangles
-	//for (int i = 0; i < stacks; ++i) {
-	//	for (int j = 0; j < slices; ++j) {
-	//		int i0 = i * (slices + 1) + j;
-	//		int i1 = i0 + 1;
-	//		int i2 = (i + 1) * (slices + 1) + j;
-	//		int i3 = i2 + 1;
+	//sphere triangles
+	for (int i = 0; i < stacks; ++i) {
+		for (int j = 0; j < slices; ++j) {
+			int i0 = i * (slices + 1) + j;
+			int i1 = i0 + 1;
+			int i2 = (i + 1) * (slices + 1) + j;
+			int i3 = i2 + 1;
 
-	//		sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
-	//		sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
-	//	}
-	//}
+			sphere->Poly3(vertices[i0], vertices[i2], vertices[i1], NULL);
+			sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
+		}
+	}
 
 	//// cylinder
 	//CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
