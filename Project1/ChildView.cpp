@@ -105,6 +105,7 @@ CChildView::CChildView()
 	//tetrahedron->Poly3(v1, v3, v2, NULL);
 
 	// sphere
+	glEnable(GL_TEXTURE_2D);
 	CGrPtr<CGrMaterial> spherePaint = new CGrMaterial;
 	spherePaint->AmbientAndDiffuse(0.8f, 0.2f, 0.2f); // red
 	spherePaint->Specular(0.5f, 0.5f, 0.5f);
@@ -146,6 +147,7 @@ CChildView::CChildView()
 			sphere->Poly3(vertices[i1], vertices[i2], vertices[i3], NULL);
 		}
 	}
+	glDisable(GL_TEXTURE_2D);
 
 	//// cylinder
 	//CGrPtr<CGrMaterial> cylinderPaint = new CGrMaterial;
@@ -188,7 +190,7 @@ CChildView::CChildView()
 	//	cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
 	//}
 
-	// Floor
+	// Floor	
 	CGrPtr<CGrMaterial> greenpaint = new CGrMaterial;
 	greenpaint->AmbientAndDiffuse(0.1f, 0.8f, 0.1f);
 	scene->Child(greenpaint);
@@ -261,19 +263,16 @@ CChildView::CChildView()
 	// Right side
 	windowFrame->Box(-5.01f, -2.5f, 0.8f, 0.02f, 2.2f, 0.2f);
 
-	//tree stump
+	// Tree stump
+	glEnable(GL_TEXTURE_2D);
 	CGrPtr<CGrTexture> woodPaint = new CGrTexture;
 	woodPaint->LoadFile(L"textures/plank01.bmp");
-	scene->Child(woodPaint);
-	glBindTexture(GL_TEXTURE_2D, woodPaint->TexName());
+	scene->Child(woodPaint);  // Add texture to scene
+
 	CGrPtr<CGrComposite> cylinder = new CGrComposite;
+	scene->Child(cylinder);  // Make cylinder a child of the texture object
 
-	CGrPtr<CGrMaterial> brownPaint = new CGrMaterial;
-	brownPaint->AmbientAndDiffuse(0.3f, 0.1f, 0.1f); // dark red
-	scene->Child(brownPaint);
-
-	brownPaint->Child(cylinder);	
-
+	// Define cylinder parameters
 	const float cylRadius = 1.5f;
 	const float cylHeight = 5.0f;
 	const CGrPoint cylBase(-10.0f, -4.0f, -10.0f);
@@ -281,29 +280,31 @@ CChildView::CChildView()
 
 	std::vector<CGrPoint> bottomPoints, topPoints;
 
-	// cylinder vertices
+	// Generate vertices
 	for (int i = 0; i < segments; ++i) {
 		double theta = 2 * GR_PI * i / segments;
 		double x = cylRadius * cos(theta);
 		double z = cylRadius * sin(theta);
+
 		bottomPoints.push_back(cylBase + CGrPoint(x, 0.0f, z));
 		topPoints.push_back(cylBase + CGrPoint(x, cylHeight, z));
 	}
 
-	//cylinder
+	// Create cylinder geometry
 	for (int i = 0; i < segments; ++i) {
 		int next = (i + 1) % segments;
 
-		// sides
-		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], NULL);
+		// Sides
+		cylinder->Poly4(bottomPoints[i], topPoints[i], topPoints[next], bottomPoints[next], woodPaint);
 
-		// bottom 
-		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], NULL);
+		// Bottom
+		cylinder->Poly3(cylBase, bottomPoints[i], bottomPoints[next], woodPaint);
 
-		// top cap
+		// Top cap
 		CGrPoint topCenter = cylBase + CGrPoint(0.0f, cylHeight, 0.0f);
-		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], NULL);
+		cylinder->Poly3(topCenter, topPoints[next], topPoints[i], woodPaint);
 	}
+
 	glDisable(GL_TEXTURE_2D);
 
 	// tetrahedron
