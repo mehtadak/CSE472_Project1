@@ -60,25 +60,31 @@ CChildView::CChildView()
 	//greenpaint->Child(floor);
 	//floor->Box(-15, -18, -15, 30, 1, 30);
 
-	//// blue pyramid
-	//CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
-	//bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
-	//scene->Child(bluepaint);
-	//CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
-	//bluepaint->Child(bluepyramid);
-	////verts
+	// blue pyramid
+	CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
+	bluepaint->AmbientAndDiffuse(0.0f, 0.0f, 0.8f);
+	scene->Child(bluepaint);
+	CGrPtr<CGrComposite> bluepyramid = new CGrComposite;
+	bluepaint->Child(bluepyramid);
+	//verts
 	CGrPoint top(0.0f, 2.5f, 0.0f);
-	//CGrPoint base1(-3.0f, -3.0f, 3.0f);
-	//CGrPoint base2(3.0f, -3.0f, 3.0f);
-	//CGrPoint base3(3.0f, -3.0f, -3.0f);
-	//CGrPoint base4(-3.0f, -3.0f, -3.0f);
-	//// sides
-	//bluepyramid->Poly3(top, base1, base2, NULL);
-	//bluepyramid->Poly3(top, base2, base3, NULL);
-	//bluepyramid->Poly3(top, base3, base4, NULL);
-	//bluepyramid->Poly3(top, base4, base1, NULL);
-	////base
-	//bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+	CGrPoint base1(-3.0f, -3.0f, 3.0f);
+	CGrPoint base2(3.0f, -3.0f, 3.0f);
+	CGrPoint base3(3.0f, -3.0f, -3.0f);
+	CGrPoint base4(-3.0f, -3.0f, -3.0f);
+	// sides
+	bluepyramid->Poly3(top, base1, base2, NULL);
+	bluepyramid->Poly3(top, base2, base3, NULL);
+	bluepyramid->Poly3(top, base3, base4, NULL);
+	bluepyramid->Poly3(top, base4, base1, NULL);
+	//base
+	bluepyramid->Poly4(base1, base4, base3, base2, NULL);
+	
+	CGrPtr<CGrMaterial> bluepaint2 = new CGrMaterial;
+	bluepaint2->AmbientAndDiffuse(0.3f, 0.3f, 1.0f);
+	scene->Child(bluepaint2);
+	CGrPtr<CGrComposite> bluepyramid2 = new CGrComposite;
+	bluepaint2->Child(bluepyramid2); 
 
 	//// tetrahedron
 	//CGrPtr<CGrMaterial> tetPaint = new CGrMaterial;
